@@ -1,0 +1,81 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section TopActions {
+    <button class="btn btn-ghost" style="font-size:12px" onclick="window.print()">Print Ledger</button>
+}
+
+<div id="errReport" class="alert-error" style="display:none; font-size:13px; margin-bottom:15px;"></div>
+
+<!-- Exact same container from Admin, but no dropdown! -->
+<div id="ledgerContainer" style="display:none;">
+    <div class="ledger-header" style="display:flex; align-items:center; gap:12px; padding:14px; background:var(--surface2); border-radius:8px; margin-bottom:14px; border: 1px solid var(--border2);">
+        <div id="ledgerInfo" style="display:flex; align-items:center; gap:12px; flex:1;"></div>
+        <div class="ledger-balance" style="text-align:right;">
+            <div class="balance-label" style="font-size:11px; color:var(--muted);">Outstanding Balance</div>
+            <div id="ledgerBigBalance" class="balance-amount" style="font-family:var(--mono); font-size:20px; font-weight:600;">₱0.00</div>
+        </div>
+    </div>
+
+    <div class="student-table-wrap">
+        <table class="student-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th style="text-align:right;">Charges</th>
+                    <th style="text-align:right;">Payments</th>
+                    <th style="text-align:right;">Discount</th>
+                    <th style="text-align:right;">Balance</th>
+                </tr>
+            </thead>
+            <tbody id="ledgerBody"></tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Automatically load the ledger for the logged in student!
+            let studentId = @ViewBag.MyStudentId;
+            let errBox = $("#errReport");
+            let container = $("#ledgerContainer");
+
+            errBox.text("Loading your ledger...").removeClass("alert-error").css({ "color": "var(--accent)", "background": "transparent", "border": "none" }).show();
+
+            $.post("@Url.Action("GetLedger", "Report")", { studentId: studentId }, function (res) {
+
+                errBox.addClass("alert-error").css({ "color": "", "background": "", "border": "" });
+
+                if (res.status == "error") {
+                    errBox.text(res.message).show();
+                    return;
+                }
+                errBox.hide();
+
+                $("#ledgerInfo").html(res.infoHtml);
+                let balColor = parseFloat(res.finalBalance.replace(/,/g, '')) <= 0 ? "var(--success)" : "var(--danger)";
+                $("#ledgerBigBalance").text("₱" + res.finalBalance).css("color", balColor);
+
+                let tbody = $("#ledgerBody");
+                res.rows.forEach(function (r) {
+                    let badgeClass = r.type === "Charge" ? "badge-warn" : (r.type === "Payment" ? "badge-success" : "badge-info");
+                    let tr = `<tr>
+                        <td style="color:var(--muted); font-size:12px;">${r.date}</td>
+                        <td style="font-weight:500;">${r.desc}</td>
+                        <td><span class="badge ${badgeClass}">${r.type}</span></td>
+                        <td style="text-align:right; font-family:var(--mono);">${r.charge !== "-" ? "₱"+r.charge : "-"}</td>
+                        <td style="text-align:right; font-family:var(--mono); color:var(--success);">${r.pay !== "-" ? "₱"+r.pay : "-"}</td>
+                        <td style="text-align:right; font-family:var(--mono); color:var(--accent);">${r.disc !== "-" ? "₱"+r.disc : "-"}</td>
+                        <td style="text-align:right; font-family:var(--mono); font-weight:600;">₱${r.bal}</td>
+                    </tr>`;
+                    tbody.append(tr);
+                });
+                container.fadeIn();
+            });
+        });
+    </script>
+}

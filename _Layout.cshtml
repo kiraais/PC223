@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - AcadFin System</title>
+
+    <!-- Link the CSS we just created -->
+    <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
+
+    <!-- jQuery bundled with MVC -->
+    @Scripts.Render("~/bundles/jquery")
+</head>
+<body>
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-badge">@(Session["role"] != null ? Session["role"].ToString().ToUpper() : "SYSTEM")</div>
+                <div class="brand">AcadFin System</div>
+                <div class="sub">Student Accounting v1.0</div>
+            </div>
+
+            <nav class="nav">
+                <!-- COMMON DASHBOARD -->
+                <div class="nav-section">Main</div>
+                <a href="@Url.Action("Dashboard", "Home")" class="nav-item @(ViewContext.RouteData.Values["controller"].ToString() == "Home" ? "active" : "")">
+                    <span class="nav-icon">◻</span> Dashboard
+                </a>
+
+                @if (Session["role"] != null && Session["role"].ToString() == "Admin")
+                {
+                    <!-- ADMIN ONLY MENU -->
+                    <a href="@Url.Action("Index", "Student")" class="nav-item @(ViewContext.RouteData.Values["controller"].ToString() == "Student" ? "active" : "")">
+                        <span class="nav-icon">◻</span> Student Accounts
+                    </a>
+                    <a href="@Url.Action("Index", "Assessment")" class="nav-item @(ViewContext.RouteData.Values["controller"].ToString() == "Assessment" ? "active" : "")">
+                        <span class="nav-icon">◻</span> Fee Assessment
+                    </a>
+
+                    <div class="nav-section">Finance</div>
+                    <a href="@Url.Action("Index", "Report")" class="nav-item @(ViewContext.RouteData.Values["controller"].ToString() == "Report" ? "active" : "")">
+                        <span class="nav-icon">◻</span> Reports
+                    </a>
+                    <a href="@Url.Action("Index", "Discount")" class="nav-item @(ViewContext.RouteData.Values["controller"].ToString() == "Discount" ? "active" : "")">
+                        <span class="nav-icon">◻</span> Discounts
+                    </a>
+
+                    <div class="nav-section">Administration</div>
+                    <a href="@Url.Action("Index", "Scholarship")" class="nav-item @(ViewContext.RouteData.Values["controller"].ToString() == "Scholarship" ? "active" : "")">
+                        <span class="nav-icon">◻</span> Scholarships
+                    </a>
+                    <a href="@Url.Action("Index", "Course")" class="nav-item @(ViewContext.RouteData.Values["controller"].ToString() == "Course" ? "active" : "")">
+                        <span class="nav-icon">◻</span> Courses
+                    </a>
+                }
+                else if (Session["role"] != null && Session["role"].ToString() == "Student")
+                {
+                    <!-- STUDENT ONLY MENU -->
+                    <a href="@Url.Action("MyLedger", "Report")" class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "MyLedger" ? "active" : "")">
+                        <span class="nav-icon">◻</span> My Ledger
+                    </a>
+                }
+
+                <!-- COMMON ACCOUNT MENU -->
+                <div class="nav-section">Account</div>
+                <a href="@Url.Action("ChangePassword", "Auth")" class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "ChangePassword" ? "active" : "")">
+                    <span class="nav-icon">◻</span> Change Password
+                </a>
+                <a href="@Url.Action("Logout", "Auth")" class="nav-item">
+                    <span class="nav-icon" style="color:var(--danger)">◻</span>
+                    <span style="color:var(--danger)">Logout</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-user">
+                <div class="avatar">@(Session["firstname"] != null ? Session["firstname"].ToString().Substring(0,1).ToUpper() : "U")</div>
+                <div class="user-info">
+                    <div class="name">@(Session["firstname"] != null ? Session["firstname"].ToString() : "Guest")</div>
+                    <div class="role">@(Session["role"] != null ? Session["role"].ToString() : "Please Login")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN WINDOW -->
+        <div class="main">
+            <!-- TOP BAR -->
+            <div class="topbar">
+                <div>
+                    <div class="page-title">@ViewBag.Title</div>
+                    <div class="page-sub">@ViewBag.Subtitle</div>
+                </div>
+
+                <!-- This allows specific pages to add buttons (like + Register Student) dynamically -->
+                <div class="topbar-actions">
+                    @RenderSection("TopActions", required: false)
+                </div>
+            </div>
+
+            <!-- DYNAMIC CONTENT AREA -->
+            <div class="content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts section for specific pages -->
+    @RenderSection("scripts", required: false)
+</body>
+</html>

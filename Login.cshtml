@@ -1,0 +1,117 @@
+﻿@{
+    Layout = null; // No Sidebar for Login
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Login - AcadFin System</title>
+    <!-- We reuse the Site.css to keep fonts and colors consistent! -->
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <style>
+        /* Center the login box completely */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .login-box {
+            background: var(--surface);
+            width: 360px;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .login-title {
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+
+        .login-sub {
+            font-size: 12px;
+            color: var(--muted);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        #error-msg {
+            display: none;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <div class="login-title">AcadFin System</div>
+        <div class="login-sub">Student Accounting v1.0</div>
+
+        <!-- Error Alert box (Hidden by default) -->
+        <div id="error-msg" class="alert-error"></div>
+
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label class="form-label">Username</label>
+            <input type="text" id="txtUsername" class="form-input" placeholder="Enter your username" />
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label">Password</label>
+            <input type="password" id="txtPassword" class="form-input" placeholder="Enter your password" />
+        </div>
+
+        <button id="btnLogin" class="btn btn-primary btn-block">Sign In</button>
+    </div>
+
+    <!-- jQuery included -->
+    <script src="~/Scripts/jquery-3.7.0.min.js"></script>
+
+    <script>
+        // Exact AJAX Boilerplate as requested in Roadmap
+        $("#btnLogin").click(function () {
+
+            // Basic validation
+            if ($("#txtUsername").val() == "" || $("#txtPassword").val() == "") {
+                $("#error-msg").text("Please fill in both fields.").show();
+                return;
+            }
+
+            // AJAX call to AuthController
+            $.post("/Auth/Login", {
+                username: $("#txtUsername").val(),
+                password: $("#txtPassword").val()
+            }, function (response) {
+                if (response.status == "ok") {
+                    // Success! Redirect to Dashboard (We will build Home/Dashboard next)
+                    window.location.href = "/Home/Dashboard";
+                } else {
+                    // Show error message
+                    $("#error-msg").text(response.message).show();
+                    $("#txtPassword").val(""); // clear password box
+                }
+            });
+        });
+
+        // Allow pressing "Enter" key to login
+        $("#txtPassword").keypress(function(e) {
+            if(e.which == 13) { $("#btnLogin").click(); }
+        });
+    </script>
+</body>
+</html>

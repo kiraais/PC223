@@ -1,0 +1,120 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (Session["role"].ToString() == "Admin")
+{
+    @section TopActions {
+        <button class="btn btn-ghost" style="font-size:12px;" onclick="window.print()">Print Report</button>
+        <a href="@Url.Action("Index", "Student")" class="btn btn-primary">+ Register Student</a>
+    }
+
+    <!-- ADMIN STATS GRID -->
+    <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Enrolled Students</div><div class="stat-value">@ViewBag.TotalStudents</div></div>
+        <div class="stat-card"><div class="stat-label">Total Assessed</div><div class="stat-value">₱@ViewBag.TotalAssessed</div></div>
+        <div class="stat-card"><div class="stat-label">Total Collected</div><div class="stat-value">₱@ViewBag.TotalCollected</div></div>
+        <div class="stat-card"><div class="stat-label">Outstanding Balance</div><div class="stat-value" style="color:var(--danger)">₱@ViewBag.OutstandingBalance</div></div>
+    </div>
+
+    <!-- ADMIN BOTTOM SECTIONS -->
+    <div class="grid-2">
+        <div class="card" style="align-self: start;">
+            <div class="card-title">Recent System Payments</div>
+            <table class="table">
+                <thead><tr><th>Student</th><th style="text-align:right">Amount</th><th>Term</th><th>Date</th></tr></thead>
+                <tbody>
+                    @foreach (var rp in ViewBag.RecentPayments)
+                    {
+                        <tr>
+                            <td><div style="font-weight:500">@rp["name"]</div><div style="font-size:11px;color:var(--muted)">@rp["student_number"]</div></td>
+                            <td style="font-family:var(--mono); text-align:right; font-weight:600; color:var(--success)">₱@rp["amount"]</td>
+                            <td><span class="badge badge-gray">@rp["term"]</span></td>
+                            <td style="color:var(--muted); font-size:12px;">@rp["date"]</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card" style="align-self: start;">
+            <div class="card-title">System Population</div>
+            <table class="table">
+                <tbody>
+                    @foreach (var c in ViewBag.Courses)
+                    {
+                        <tr><td style="font-weight:600; font-family:var(--mono)">@c["code"]</td><td style="text-align:right;"><span class="badge badge-gray">@c["count"] Students</span></td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <!-- STUDENT DASHBOARD -->
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-label">My Program</div>
+            <div class="stat-value" style="font-size:18px;">@ViewBag.Course</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Units Enrolled</div>
+            <div class="stat-value">@ViewBag.Units</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Assessed</div>
+            <div class="stat-value">₱@ViewBag.MyAssessed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">My Remaining Balance</div>
+            <div class="stat-value" style="color:var(--danger)">₱@ViewBag.MyBalance</div>
+        </div>
+    </div>
+
+    <!-- balanced 2-column grid to fix the stretched table -->
+    <div class="grid-2" style="margin-top: 20px;">
+
+        <!-- LEFT: Payment History -->
+        <div class="card" style="align-self: start;">
+            <div class="card-title">My Payment History</div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Payment Term</th>
+                        <th style="text-align:right">Amount Paid</th>
+                        <th style="text-align:right">Date Posted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in ViewBag.MyPayments)
+                    {
+                        <tr>
+                            <td style="font-weight:500;">@p["term"] Payment</td>
+                            <td style="font-family:var(--mono); text-align:right; font-weight:600; color:var(--success)">₱@p["amount"]</td>
+                            <td style="color:var(--muted); font-size:12px; text-align:right;">@p["date"]</td>
+                        </tr>
+                    }
+                    @if (ViewBag.MyPayments.Count == 0)
+                    {
+                        <tr><td colspan="3" style="text-align:center; color:var(--muted); padding: 20px;">You have not made any payments yet.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- RIGHT: Quick Actions -->
+        <div class="card" style="align-self: start;">
+            <div class="card-title">Quick Actions</div>
+
+            <div style="padding: 16px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border2); text-align: center;">
+                <div style="font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.5;">
+                    Need a detailed breakdown of your tuition, miscellaneous charges, and applied discounts?
+                </div>
+                <a href="@Url.Action("MyLedger", "Report")" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    View Full Ledger
+                </a>
+            </div>
+        </div>
+
+    </div>
+}

@@ -1,0 +1,236 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section TopActions {
+    <button class="btn btn-primary" onclick="openModal('addStudent')">+ Register Student</button>
+}
+
+<div class="filter-bar" style="margin-bottom: 16px;">
+    <!-- Simple client-side search box -->
+    <input type="text" id="searchInput" class="form-input" placeholder="Search by name or student ID..." style="width: 300px;">
+</div>
+
+<div class="student-table-wrap">
+    <table class="student-table" id="studentTable">
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Name & Email</th>
+                <th>Course / Year</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in ViewBag.Students)
+            {
+                <tr>
+                    <td style="font-family:var(--mono); color:var(--muted);">@s["student_number"]</td>
+                    <td>
+                        <div style="font-weight:500; color:var(--text);">@s["fullname"]</div>
+                        <div style="font-size:11px; color:var(--muted);">@s["email"]</div>
+                    </td>
+                    <td>
+                        <div>@s["course_code"]</div>
+                        <div style="font-size:11px; color:var(--muted);">Year @s["year_level"]</div>
+                    </td>
+                    <td>
+                        @if (s["status"] == "Enrolled")
+                        {<span class="badge badge-success">Enrolled</span> }
+                        else
+                        { <span class="badge badge-gray">@s["status"]</span>}
+                    </td>
+                </tr>
+            }
+            @if (ViewBag.Students.Count == 0)
+            {
+                <tr><td colspan="4" style="text-align:center; color:var(--muted); padding:20px;">No students registered yet.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- REGISTER STUDENT MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" id="modal-addStudent" style="display:none; width: 600px;">
+        <!-- Slightly wider for the big form -->
+        <div class="modal-header">
+            <div class="modal-title">Register New Student</div>
+            <button class="modal-close" onclick="closeAllModals()">×</button>
+        </div>
+        <div class="modal-body">
+
+            <div id="errStudent" class="alert-error" style="display:none; font-size:12px; margin-bottom:12px;"></div>
+
+            <div class="form-grid">
+                <div class="form-section">Personal Information</div>
+
+                <div class="form-group">
+                    <label class="form-label">Student ID (Username)</label>
+                    <input type="text" id="txtSNo" class="form-input" placeholder="e.g. 2024-0001">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="txtEmail" class="form-input" placeholder="student@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    <input type="text" id="txtFName" class="form-input" placeholder="First Name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" id="txtLName" class="form-input" placeholder="Last Name">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Middle Name</label>
+                    <input type="text" id="txtMName" class="form-input" placeholder="Optional">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gender</label>
+                    <select id="selGender" class="form-input">
+                        <option value="Female">Female</option>
+                        <option value="Male">Male</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" id="txtDOB" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Number</label>
+                    <input type="text" id="txtContact" class="form-input" placeholder="09XX-XXX-XXXX">
+                </div>
+
+                <div class="form-group full">
+                    <label class="form-label">Home Address</label>
+                    <input type="text" id="txtAddress" class="form-input" placeholder="Full Address">
+                </div>
+
+                <div class="form-section">Academic Information</div>
+
+                <div class="form-group">
+                    <label class="form-label">Course</label>
+                    <select id="selCourse" class="form-input">
+                        <option value="">-- Select Course --</option>
+                        @foreach (var c in ViewBag.Courses)
+                        {
+                            <option value="@c["id"]">@c["code"]</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Year Level</label>
+                    <select id="selYear" class="form-input">
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">School Year</label>
+                    <input type="text" id="txtSY" class="form-input" placeholder="e.g. 2024-2025" value="2024-2025">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Units Enrolled</label>
+                    <input type="number" id="txtUnits" class="form-input" placeholder="e.g. 21">
+                </div>
+
+                <div class="form-group full">
+                    <label class="form-label">Scholarship (if any)</label>
+                    <select id="selSchol" class="form-input">
+                        <option value="">None</option>
+                        @foreach (var sch in ViewBag.Scholarships)
+                        {
+                            <option value="@sch["id"]">@sch["name"]</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+            <button class="btn btn-primary" id="btnSaveStudent">Register Student</button>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Modal Logic
+        function openModal(id) {
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+            $(".alert-error").hide().text("");
+            document.getElementById('modal-' + id).style.display = 'block';
+            document.getElementById('modal-overlay').classList.add('open');
+        }
+
+        function closeAllModals() {
+            document.getElementById('modal-overlay').classList.remove('open');
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        }
+
+        function closeModal(e) {
+            if (e.target === document.getElementById('modal-overlay')) closeAllModals();
+        }
+
+        // Live Table Search filter
+        $("#searchInput").on("keyup", function () {
+            let value = $(this).val().toLowerCase();
+            $("#studentTable tbody tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+
+        // AJAX Save Student
+        $("#btnSaveStudent").click(function () {
+            let sno = $("#txtSNo").val().trim();
+            let fname = $("#txtFName").val().trim();
+            let lname = $("#txtLName").val().trim();
+            let course = $("#selCourse").val();
+            let units = $("#txtUnits").val();
+            let errBox = $("#errStudent");
+
+            errBox.hide();
+
+            // Minimal Validation
+            if (!sno || !fname || !lname || !course || !units) {
+                errBox.text("Please fill in Student ID, First Name, Last Name, Course, and Units Enrolled.").show();
+                return;
+            }
+
+            // Post Data
+            $.post("/Student/Save", {
+                studentNo: sno,
+                fname: fname,
+                mname: $("#txtMName").val().trim(),
+                lname: lname,
+                gender: $("#selGender").val(),
+                bdate: $("#txtDOB").val(),
+                address: $("#txtAddress").val().trim(),
+                contact: $("#txtContact").val().trim(),
+                email: $("#txtEmail").val().trim(),
+                courseId: course,
+                yearLevel: $("#selYear").val(),
+                schoolYear: $("#txtSY").val().trim(),
+                units: units,
+                scholId: $("#selSchol").val()
+            }, function (res) {
+                if (res.status == "ok") {
+                    location.reload();
+                } else {
+                    // Check if error is duplicate constraint (e.g. student number already exists)
+                    if (res.message.includes("UNIQUE KEY")) {
+                        errBox.text("Database Error: This Student ID is already taken.").show();
+                    } else {
+                        errBox.text("Database Error: " + res.message).show();
+                    }
+                }
+            });
+        });
+    </script>
+}
